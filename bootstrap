@@ -1,0 +1,70 @@
+#!/bin/bash
+
+DOTFILES=$HOME/.dotfiles
+BSTD=$DOTFILES/bootstrap.d
+source $BSTD/utils.sh
+
+init_brew() {
+	# brew exist?
+	if [ -x "`which brew`" ]; then
+		log_warn 'brew already exists!'
+		setup_brew
+	else
+		install_brew
+		setup_brew
+		post_setup_brew
+	fi
+}
+
+install_brew() {
+	log_echo ''
+	log_echo 'Install homebrew'
+	ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+}
+
+setup_brew() {
+	log_echo ''
+	log_echo 'Run brew bundle'
+	brew bundle --file=$DOTFILES/Brewfile
+}
+
+post_setup_brew() {
+	log_echo ''
+	log_echo 'Run post brew bundle'
+}
+
+init() {
+	log_echo ''
+	log_echo 'Run Init'
+	ask_sudo_password
+	init_brew
+}
+
+update() {
+	log_echo ''
+	log_echo 'Run Update'
+	setup_brew
+}
+
+usage() {
+	log_error >&2 "Usage: $0 <init|update|brew>"
+	exit 1
+}
+
+case $1 in
+init)
+	init
+	;;
+update)
+	update
+	;;
+brew)
+	setup_brew
+	;;
+*)
+	usage
+	;;
+esac
+
+log_echo ''
+log_pass "$0: Finish!!"
